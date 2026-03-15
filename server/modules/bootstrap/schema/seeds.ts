@@ -37,22 +37,23 @@ export function applyDefaultSeeds(db: DbLike): void {
 
   // Seed default settings if none exist
   {
+    // Chao Garden themed room colors
     const defaultRoomThemes = {
-      ceoOffice: { accent: 0xa77d0c, floor1: 0xe5d9b9, floor2: 0xdfd0a8, wall: 0x998243 },
-      planning: { accent: 0xd4a85a, floor1: 0xf0e1c5, floor2: 0xeddaba, wall: 0xae9871 },
-      dev: { accent: 0x5a9fd4, floor1: 0xd8e8f5, floor2: 0xcce1f2, wall: 0x6c96b7 },
-      design: { accent: 0x9a6fc4, floor1: 0xe8def2, floor2: 0xe1d4ee, wall: 0x9378ad },
-      qa: { accent: 0xd46a6a, floor1: 0xf0cbcb, floor2: 0xedc0c0, wall: 0xae7979 },
-      devsecops: { accent: 0xd4885a, floor1: 0xf0d5c5, floor2: 0xedcdba, wall: 0xae8871 },
-      operations: { accent: 0x5ac48a, floor1: 0xd0eede, floor2: 0xc4ead5, wall: 0x6eaa89 },
-      breakRoom: { accent: 0xf0c878, floor1: 0xf7e2b7, floor2: 0xf6dead, wall: 0xa99c83 },
+      ceoOffice: { accent: 0x8ab040, floor1: 0xc8d8a8, floor2: 0xb8c898, wall: 0x7a9a5a },
+      planning: { accent: 0xc0a040, floor1: 0xe8d8a8, floor2: 0xdccda0, wall: 0x9a8a60 },
+      dev: { accent: 0x4a8a30, floor1: 0xc0d8a0, floor2: 0xb0c890, wall: 0x6a8a50 },
+      design: { accent: 0xa060a0, floor1: 0xe0c8e0, floor2: 0xd4b8d4, wall: 0x8a6a8a },
+      qa: { accent: 0xc06030, floor1: 0xe0b8a0, floor2: 0xd4a890, wall: 0x8a6a50 },
+      devsecops: { accent: 0x5080a0, floor1: 0xb8c8d8, floor2: 0xa8b8c8, wall: 0x6a7a8a },
+      operations: { accent: 0x40a060, floor1: 0xa8d4b8, floor2: 0x98c8a8, wall: 0x5a8a6a },
+      breakRoom: { accent: 0x40a0c0, floor1: 0xa8d0e0, floor2: 0x98c0d4, wall: 0x6a9aaa },
     };
 
     const settingsCount = (db.prepare("SELECT COUNT(*) as c FROM settings").get() as { c: number }).c;
     const isLegacySettingsInstall = settingsCount > 0;
     if (settingsCount === 0) {
       const insertSetting = db.prepare("INSERT INTO settings (key, value) VALUES (?, ?)");
-      insertSetting.run("companyName", "Claw-Empire");
+      insertSetting.run("companyName", "Chao Empire");
       insertSetting.run("ceoName", "CEO");
       insertSetting.run("autoAssign", "true");
       insertSetting.run("yoloMode", "false");
