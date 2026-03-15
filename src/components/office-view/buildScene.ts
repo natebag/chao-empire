@@ -16,6 +16,7 @@ import type { BuildOfficeSceneContext } from "./buildScene-types";
 import { buildCeoAndHallway } from "./buildScene-ceo-hallway";
 import { buildDepartmentRooms } from "./buildScene-departments";
 import { buildBreakRoom } from "./buildScene-break-room";
+import { buildSpecialRooms } from "./buildScene-special-rooms";
 import { buildFinalLayers } from "./buildScene-final-layers";
 
 export function buildOfficeScene(context: BuildOfficeSceneContext): void {
@@ -139,7 +140,10 @@ export function buildOfficeScene(context: BuildOfficeSceneContext): void {
   const roomW = Math.max(baseRoomW, Math.floor(totalRoomSpace / gridCols));
   const roomH = Math.max(170, agentRows * SLOT_H + 44);
   const deptStartY = CEO_ZONE_H + HALLWAY_H;
-  const breakRoomY = deptStartY + gridRows * (roomH + roomGap) + BREAK_ROOM_GAP;
+  const SPECIAL_ROOMS_H = 110; // gym, library, server room row
+  const SPECIAL_ROOMS_GAP = 24;
+  const specialRoomsY = deptStartY + gridRows * (roomH + roomGap) + SPECIAL_ROOMS_GAP;
+  const breakRoomY = specialRoomsY + SPECIAL_ROOMS_H + BREAK_ROOM_GAP;
   const totalH = breakRoomY + BREAK_ROOM_H + 30;
   const roomStartX = (OFFICE_W - (gridCols * roomW + (gridCols - 1) * roomGap)) / 2;
   totalHRef.current = totalH;
@@ -194,6 +198,15 @@ export function buildOfficeScene(context: BuildOfficeSceneContext): void {
     nextSubSnapshot,
   });
   subCloneSnapshotRef.current = nextSubSnapshot;
+
+  buildSpecialRooms({
+    app,
+    activeLocale,
+    isDark,
+    specialRoomsY,
+    OFFICE_W: officeWRef.current,
+    wallClocksRef,
+  });
 
   buildBreakRoom({
     app,

@@ -114,6 +114,17 @@ export function useRealtimeSync({
           });
         }
       }),
+      on("room_change", (payload: unknown) => {
+        const p = payload as { agentId: string; room: string };
+        if (!p.agentId || !p.room) return;
+        setAgents((prev) => {
+          const idx = prev.findIndex((a) => a.id === p.agentId);
+          if (idx < 0) return prev;
+          const next = [...prev];
+          next[idx] = { ...next[idx], currentRoom: p.room };
+          return next;
+        });
+      }),
       on("agent_created", () => {
         scheduleLiveSync(60);
       }),

@@ -23,6 +23,19 @@ export type AgentRole = "team_leader" | "senior" | "junior" | "intern";
 export type AgentStatus = "idle" | "working" | "break" | "offline";
 export type CliProvider = "claude" | "codex" | "gemini" | "opencode" | "kimi" | "copilot" | "antigravity" | "api";
 export type MeetingReviewDecision = "reviewing" | "approved" | "hold";
+export type AgentMood = "happy" | "focused" | "tired" | "frustrated" | "excited" | "curious";
+
+export interface ModelConfigFallback {
+  provider: string;
+  model: string;
+  triggerOn: string;
+}
+
+export interface ModelConfig {
+  provider: string;
+  model: string;
+  fallbacks?: ModelConfigFallback[];
+}
 
 export interface Agent {
   id: string;
@@ -44,10 +57,16 @@ export interface Agent {
   avatar_emoji: string;
   sprite_number?: number | null;
   personality: string | null;
+  model_config?: ModelConfig | null;
+  mood?: AgentMood | null;
+  energy?: number | null;
   status: AgentStatus;
   current_task_id: string | null;
+  currentRoom?: string | null;
   stats_tasks_done: number;
   stats_xp: number;
+  level?: number | null;
+  sprite_config?: Record<string, unknown> | null;
   created_at: number;
 }
 
@@ -286,6 +305,7 @@ export type WSEventType =
   | "ceo_office_call"
   | "chat_stream"
   | "task_report"
+  | "room_change"
   | "connected";
 
 export interface WSEvent {
