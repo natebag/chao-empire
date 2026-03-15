@@ -389,6 +389,19 @@ CREATE TABLE IF NOT EXISTS room_assignments (
 );
 CREATE INDEX IF NOT EXISTS idx_room_assignments_room ON room_assignments(room);
 
+-- Chao Empire: Agent memories (personality, learnings, contextual recall)
+CREATE TABLE IF NOT EXISTS agent_memories (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  agent_id TEXT NOT NULL REFERENCES agents(id) ON DELETE CASCADE,
+  memory TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT 'general' CHECK(category IN ('personality','skill','task','interaction','preference')),
+  importance INTEGER NOT NULL DEFAULT 5 CHECK(importance BETWEEN 1 AND 10),
+  source_task_id TEXT REFERENCES tasks(id) ON DELETE SET NULL,
+  created_at INTEGER DEFAULT (unixepoch()*1000)
+);
+CREATE INDEX IF NOT EXISTS idx_agent_memories_agent ON agent_memories(agent_id, importance DESC, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_agent_memories_category ON agent_memories(agent_id, category, created_at DESC);
+
 -- Chao Empire: Inter-agent chat messages
 CREATE TABLE IF NOT EXISTS agent_chats (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

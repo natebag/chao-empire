@@ -125,6 +125,16 @@ export function useRealtimeSync({
           return next;
         });
       }),
+      on("agent_leveled_up", (payload: unknown) => {
+        const p = payload as { agentId: string; newLevel: number; newXP: number };
+        setAgents((prev) => prev.map(a =>
+          a.id === p.agentId ? { ...a, level: p.newLevel, stats_xp: p.newXP } : a
+        ));
+      }),
+      on("agent_chat_bubble", (_payload: unknown) => {
+        // Chat bubbles are rendered by the break room speech system
+        // This event is consumed for potential future UI (chat log panel)
+      }),
       on("agent_created", () => {
         scheduleLiveSync(60);
       }),
