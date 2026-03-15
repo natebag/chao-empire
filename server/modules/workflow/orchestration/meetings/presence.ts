@@ -1,5 +1,6 @@
 import type { Lang } from "../../../../types/lang.ts";
 import { assignRoom } from "../../room-manager/index.ts";
+import { applyMoodTrigger, awardXP } from "../../mood-engine/index.ts";
 
 interface AgentRow {
   id: string;
@@ -95,6 +96,7 @@ export function createMeetingPresenceTools(deps: PresenceDeps) {
       markAgentInMeeting(leader.id, 600_000, seatIndex, phase, taskId);
       // Room assignment: move leader to meeting room
       assignRoom(db, leader.id, "meeting");
+      applyMoodTrigger(db, leader.id, "meeting_started", broadcast);
       broadcast("room_change", { agentId: leader.id, room: "meeting", reason: "meeting_started", timestamp: Date.now() });
       broadcast("ceo_office_call", {
         from_agent_id: leader.id,
@@ -116,6 +118,8 @@ export function createMeetingPresenceTools(deps: PresenceDeps) {
       meetingReviewDecisionByAgent.delete(leader.id);
       // Room assignment: return leader to desk after meeting
       assignRoom(db, leader.id, "desk");
+      applyMoodTrigger(db, leader.id, "meeting_ended", broadcast);
+      awardXP(db, leader.id, "meeting_attended", broadcast);
       broadcast("room_change", { agentId: leader.id, room: "desk", reason: "meeting_ended", timestamp: Date.now() });
       broadcast("ceo_office_call", {
         from_agent_id: leader.id,

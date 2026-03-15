@@ -7,6 +7,7 @@ import {
 } from "../packs/video-artifact.ts";
 import { evaluateRemotionOnlyGateFromLogFiles } from "../packs/video-render-engine-gate.ts";
 import { assignRoom } from "../room-manager/index.ts";
+import { applyMoodTrigger, awardXP } from "../mood-engine/index.ts";
 
 type CreateRunCompleteHandlerDeps = Record<string, any>;
 
@@ -289,9 +290,11 @@ export function createRunCompleteHandler(deps: CreateRunCompleteHandlerDeps) {
       db.prepare("UPDATE agents SET status = 'idle', current_task_id = NULL WHERE id = ?").run(task.assigned_agent_id);
 
       if (finalExitCode === 0) {
-        db.prepare(
-          "UPDATE agents SET stats_tasks_done = stats_tasks_done + 1, stats_xp = stats_xp + 10 WHERE id = ?",
-        ).run(task.assigned_agent_id);
+        awardXP(db, task.assigned_agent_id, "task_completed", broadcast);
+        applyMoodTrigger(db, task.assigned_agent_id, "task_completed", broadcast);
+      } else {
+        awardXP(db, task.assigned_agent_id, "task_failed", broadcast);
+        applyMoodTrigger(db, task.assigned_agent_id, "task_failed", broadcast);
       }
 
       // Room assignment: return agent to desk after task run completes

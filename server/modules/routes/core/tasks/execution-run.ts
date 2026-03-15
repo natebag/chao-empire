@@ -12,6 +12,7 @@ import {
   loadPendingInterruptPrompts,
 } from "../../../workflow/core/interrupt-injection-tools.ts";
 import { resolveRoom, assignRoom } from "../../../workflow/room-manager/index.ts";
+import { applyMoodTrigger } from "../../../workflow/mood-engine/index.ts";
 
 export type TaskRunRouteDeps = Pick<
   RuntimeContext,
@@ -513,6 +514,7 @@ Whenever you complete a subtask, report it in this format:
         "UPDATE tasks SET status = 'in_progress', assigned_agent_id = ?, started_at = ?, updated_at = ? WHERE id = ?",
       ).run(agentId, t, t, id);
       db.prepare("UPDATE agents SET status = 'working', current_task_id = ? WHERE id = ?").run(id, agentId);
+      applyMoodTrigger(db, agentId, "task_started", broadcast);
 
       const updatedTask = db.prepare("SELECT * FROM tasks WHERE id = ?").get(id);
       const updatedAgent = db.prepare("SELECT * FROM agents WHERE id = ?").get(agentId);
@@ -575,6 +577,7 @@ Whenever you complete a subtask, report it in this format:
         "UPDATE tasks SET status = 'in_progress', assigned_agent_id = ?, started_at = ?, updated_at = ? WHERE id = ?",
       ).run(agentId, t, t, id);
       db.prepare("UPDATE agents SET status = 'working', current_task_id = ? WHERE id = ?").run(id, agentId);
+      applyMoodTrigger(db, agentId, "task_started", broadcast);
 
       const updatedTask = db.prepare("SELECT * FROM tasks WHERE id = ?").get(id);
       const updatedAgent = db.prepare("SELECT * FROM agents WHERE id = ?").get(agentId);
@@ -630,6 +633,7 @@ Whenever you complete a subtask, report it in this format:
       "UPDATE tasks SET status = 'in_progress', assigned_agent_id = ?, started_at = ?, updated_at = ? WHERE id = ?",
     ).run(agentId, t, t, id);
     db.prepare("UPDATE agents SET status = 'working', current_task_id = ? WHERE id = ?").run(id, agentId);
+    applyMoodTrigger(db, agentId, "task_started", broadcast);
 
     const updatedTask = db.prepare("SELECT * FROM tasks WHERE id = ?").get(id);
     const updatedAgent = db.prepare("SELECT * FROM agents WHERE id = ?").get(agentId);

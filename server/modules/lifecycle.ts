@@ -8,6 +8,8 @@ import { notifyTaskStatus } from "../gateway/client.ts";
 import { startDiscordReceiver } from "../messenger/discord-receiver.ts";
 import { startTelegramReceiver } from "../messenger/telegram-receiver.ts";
 import { registerGracefulShutdownHandlers } from "./lifecycle/register-graceful-shutdown.ts";
+import { applyMoodTrigger, restoreEnergy } from "./workflow/mood-engine/index.ts";
+import { maybeGenerateIdleChat } from "./workflow/agent-chat/index.ts";
 
 export function startLifecycle(ctx: RuntimeContext): void {
   const {
@@ -125,10 +127,15 @@ export function startLifecycle(ctx: RuntimeContext): void {
         if (Math.random() < 0.5) {
           const pick = idle[Math.floor(Math.random() * idle.length)];
           db.prepare("UPDATE agents SET status = 'break' WHERE id = ?").run(pick.id);
+          applyMoodTrigger(db, pick.id, "break_started", broadcast);
+          restoreEnergy(db, pick.id, 20);
           broadcast("agent_status", db.prepare("SELECT * FROM agents WHERE id = ?").get(pick.id));
         }
       }
     }
+
+    // Spontaneous inter-agent chat
+    try { maybeGenerateIdleChat(db, broadcast); } catch { /* non-critical */ }
   }
 
   function pruneDuplicateReviewMeetings(): void {
