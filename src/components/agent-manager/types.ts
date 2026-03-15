@@ -28,6 +28,9 @@ export interface FormData {
   fallback_model: string;
   mood: import("../../types").AgentMood | "";
   energy: number | "";
+  chao_color: string;
+  chao_accessory: string;
+  chao_personality: string;
 }
 
 export interface DeptForm {

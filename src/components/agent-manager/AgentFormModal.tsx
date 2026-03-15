@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Department } from "../../types";
 import { localeName, useI18n } from "../../i18n";
 import * as api from "../../api";
-import { CLI_PROVIDERS, MODEL_PROVIDERS, MOOD_OPTIONS, ROLE_BADGE, ROLE_LABEL, ROLES } from "./constants";
+import { CHAO_ACCESSORIES, CHAO_COLORS, CHAO_PERSONALITIES, CLI_PROVIDERS, MODEL_PROVIDERS, MOOD_OPTIONS, ROLE_BADGE, ROLE_LABEL, ROLES } from "./constants";
 import EmojiPicker from "./EmojiPicker";
 import type { FormData } from "./types";
 
@@ -476,6 +476,88 @@ export default function AgentFormModal({
               </div>
             </div>
           )}
+        </div>
+
+        {/* ── Chao Identity ── */}
+        <div className="mt-5 pt-4" style={{ borderTop: "1px solid var(--th-card-border)" }}>
+          <div
+            className="text-[10px] font-semibold uppercase tracking-widest mb-3"
+            style={{ color: "var(--th-text-muted)" }}
+          >
+            {tr("차오 정체성", "Chao Identity")}
+          </div>
+
+          {/* Color picker */}
+          <div className="mb-3">
+            <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--th-text-secondary)" }}>
+              {tr("색상", "Color")}
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {CHAO_COLORS.map((c) => {
+                const active = form.chao_color === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    title={c.label}
+                    onClick={() => setForm({ ...form, chao_color: c.id })}
+                    className={`w-7 h-7 rounded-full transition-all ${active ? "scale-110" : "hover:scale-105"}`}
+                    style={{
+                      background: c.hex,
+                      border: active ? "2px solid #ffffff" : "2px solid transparent",
+                      boxShadow: active ? `0 0 8px ${c.hex}80` : undefined,
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Accessory picker */}
+          <div className="mb-3">
+            <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--th-text-secondary)" }}>
+              {tr("액세서리", "Accessory")}
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {CHAO_ACCESSORIES.map((a) => {
+                const active = form.chao_accessory === a.id;
+                return (
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => setForm({ ...form, chao_accessory: a.id })}
+                    className={`px-2.5 py-1.5 rounded-lg text-[11px] font-medium border transition-all ${
+                      active ? "bg-blue-500/15 text-blue-400 border-blue-500/30" : ""
+                    }`}
+                    style={
+                      !active ? { borderColor: "var(--th-input-border)", color: "var(--th-text-muted)" } : undefined
+                    }
+                  >
+                    {a.emoji ? `${a.emoji} ` : ""}{a.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Personality dropdown */}
+          <div>
+            <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--th-text-secondary)" }}>
+              {tr("차오 성격", "Chao Personality")}
+            </label>
+            <select
+              value={form.chao_personality}
+              onChange={(e) => setForm({ ...form, chao_personality: e.target.value })}
+              className={`${inputCls} cursor-pointer`}
+              style={inputStyle}
+            >
+              {CHAO_PERSONALITIES.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.label} — {p.desc}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* ── Model Configuration ── */}

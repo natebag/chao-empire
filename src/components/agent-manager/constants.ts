@@ -59,6 +59,39 @@ export const EMOJI_GROUPS: { label: string; labelEn: string; emojis: string[] }[
   },
 ];
 
+export const CHAO_COLORS = [
+  { id: "blue", label: "Normal Blue", hex: "#64B5F6" },
+  { id: "green", label: "Swim Green", hex: "#81C784" },
+  { id: "red", label: "Power Red", hex: "#E57373" },
+  { id: "yellow", label: "Fly Yellow", hex: "#FFD54F" },
+  { id: "purple", label: "Run Purple", hex: "#CE93D8" },
+  { id: "orange", label: "Hero Orange", hex: "#FFB74D" },
+  { id: "dark", label: "Dark Chao", hex: "#455A64" },
+  { id: "white", label: "Angel Chao", hex: "#F5F5F5" },
+  { id: "pink", label: "Berry Pink", hex: "#F48FB1" },
+  { id: "gold", label: "Chaos Gold", hex: "#FFC107" },
+];
+
+export const CHAO_ACCESSORIES = [
+  { id: "none", label: "None", emoji: "" },
+  { id: "hat", label: "Top Hat", emoji: "🎩" },
+  { id: "glasses", label: "Glasses", emoji: "👓" },
+  { id: "headphones", label: "Headphones", emoji: "🎧" },
+  { id: "bowtie", label: "Bow Tie", emoji: "🎀" },
+  { id: "crown", label: "Crown", emoji: "👑" },
+  { id: "bandana", label: "Bandana", emoji: "🧣" },
+  { id: "flower", label: "Flower", emoji: "🌸" },
+];
+
+export const CHAO_PERSONALITIES = [
+  { id: "diligent", label: "Diligent", desc: "Works steadily, rarely takes breaks" },
+  { id: "curious", label: "Curious", desc: "Loves research, asks lots of questions" },
+  { id: "social", label: "Social", desc: "Chats often, great at collaboration" },
+  { id: "perfectionist", label: "Perfectionist", desc: "Slow but thorough, high quality" },
+  { id: "speedster", label: "Speedster", desc: "Fast but sometimes misses details" },
+  { id: "creative", label: "Creative", desc: "Unexpected solutions, design-focused" },
+];
+
 export const MODEL_PROVIDERS = ["", "anthropic", "openai", "google", "kimi", "ollama", "custom"] as const;
 export const MOOD_OPTIONS = ["", "happy", "focused", "tired", "frustrated", "excited", "curious"] as const;
 
@@ -79,6 +112,9 @@ export const BLANK: FormData = {
   fallback_model: "",
   mood: "",
   energy: "",
+  chao_color: "blue",
+  chao_accessory: "none",
+  chao_personality: "diligent",
 };
 
 export const DEPT_COLORS = [

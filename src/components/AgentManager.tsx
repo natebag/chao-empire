@@ -125,6 +125,9 @@ export default function AgentManager({
         fallback_model: agent.model_config?.fallbacks?.[0]?.model || "",
         mood: agent.mood || "",
         energy: agent.energy ?? "",
+        chao_color: ((agent.sprite_config ?? {}) as Record<string, string>).color ?? "blue",
+        chao_accessory: ((agent.sprite_config ?? {}) as Record<string, string>).accessory ?? "none",
+        chao_personality: ((agent.sprite_config ?? {}) as Record<string, string>).personality ?? "diligent",
       });
       setShowModal(true);
     },
@@ -158,6 +161,12 @@ export default function AgentManager({
               : {}),
           }
         : null;
+      const sprite_config = {
+        color: form.chao_color,
+        accessory: form.chao_accessory,
+        personality: form.chao_personality,
+        evolution_stage: 1,
+      };
       const basePayload = {
         name: form.name.trim(),
         name_ko: form.name_ko.trim(),
@@ -171,6 +180,7 @@ export default function AgentManager({
         model_config: modelConfig,
         mood: form.mood || null,
         energy: form.energy === "" ? null : form.energy,
+        sprite_config,
       };
       if (isIsolatedPack) {
         if (useDbBackedPack) {
