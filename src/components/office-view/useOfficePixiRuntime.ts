@@ -130,6 +130,15 @@ export function useOfficePixiRuntime({
         }
       }
 
+      // Pre-load Chao atlas spritesheet
+      loads.push(
+        Assets.load<Texture>("/sprites/chao-atlas.png")
+          .then((texture) => {
+            textures["chao-atlas"] = texture;
+          })
+          .catch(() => {}),
+      );
+
       loads.push(
         Assets.load<Texture>("/sprites/ceo-lobster.png")
           .then((texture) => {

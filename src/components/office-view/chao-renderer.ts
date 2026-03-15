@@ -1,4 +1,5 @@
-import { Container, Graphics } from "pixi.js";
+import { Application, Assets, Container, Graphics, Rectangle, Sprite, Texture } from "pixi.js";
+import { getChaoFrames, ATLAS_TINT, type ChaoAtlasEntry } from "./chao-atlas";
 
 // ---------------------------------------------------------------------------
 // Color palette
@@ -423,4 +424,136 @@ function drawAccessory(
   }
 
   parent.addChild(g);
+}
+
+// ---------------------------------------------------------------------------
+// Atlas-based sprite rendering
+// ---------------------------------------------------------------------------
+
+let atlasTextureCache: Texture | null = null;
+
+async function loadAtlasTexture(): Promise<Texture> {
+  if (atlasTextureCache) return atlasTextureCache;
+  atlasTextureCache = await Assets.load<Texture>("/sprites/chao-atlas.png");
+  return atlasTextureCache;
+}
+
+/**
+ * Draw a Chao character using the spritesheet atlas instead of
+ * programmatic Graphics. Falls back gracefully if the atlas fails to load.
+ *
+ * @param app        – PixiJS Application instance (unused but kept for API symmetry)
+ * @param color      – color id from CHAO_COLORS
+ * @param accessory  – accessory id from CHAO_ACCESSORIES
+ * @param direction  – "D" (front), "L" (left), "R" (right)
+ * @param frame      – animation frame 0 | 1 | 2 (index into the 3-frame walk cycle)
+ * @param size       – target height in pixels
+ */
+export async function drawChaoFromAtlas(
+  app: Application,
+  color: string,
+  accessory: string,
+  direction: "D" | "L" | "R" = "D",
+  frame: number = 0,
+  size: number = 52,
+): Promise<Container> {
+  let baseTexture: Texture;
+  try {
+    baseTexture = await loadAtlasTexture();
+  } catch {
+    // Atlas unavailable — fall back to programmatic drawing
+    return drawChaoCharacter(color, accessory, direction, frame + 1, size);
+  }
+
+  const container = new Container();
+
+  // Resolve atlas entry and pick the correct frame
+  const entry: ChaoAtlasEntry = getChaoFrames(color);
+  const frameIdx = Math.abs(frame) % 3;
+
+  // For "R" direction we render the "L" frames and mirror horizontally
+  const lookupDir = direction === "R" ? "L" : direction;
+  const rect = entry[lookupDir][frameIdx];
+
+  // Create a texture from the sub-region of the atlas
+  const frameTexture = new Texture({
+    source: baseTexture.source,
+    frame: new Rectangle(rect.x, rect.y, rect.w, rect.h),
+  });
+
+  const sprite = new Sprite(frameTexture);
+
+  // Apply tint if this color is mapped to a shared base row
+  const tint = ATLAS_TINT[color];
+  if (tint !== undefined) {
+    sprite.tint = tint;
+  }
+
+  // Scale to target size
+  const scale = size / rect.h;
+  sprite.scale.set(scale, scale);
+
+  // Mirror for right-facing direction
+  if (direction === "R") {
+    sprite.anchor.set(1, 0);
+    sprite.scale.x = -scale;
+  }
+
+  // Anchor at bottom-center to match the programmatic renderer
+  sprite.anchor.set(direction === "R" ? 1 : 0.5, 1);
+  sprite.y = 0;
+
+  container.addChild(sprite);
+
+  // Draw accessories on top using the existing programmatic approach
+  const s = size / 52;
+  const bodyCY = -20 * s;
+  drawAccessory(container, s, bodyCY, accessory, direction);
+
+  return container;
+}
+
+/**
+ * Synchronous version that uses a pre-loaded atlas texture.
+ * Use this when the atlas is already loaded (e.g. during scene build).
+ */
+export function drawChaoFromPreloadedAtlas(
+  atlasTexture: Texture,
+  color: string,
+  accessory: string,
+  direction: "D" | "L" | "R" = "D",
+  frame: number = 0,
+  size: number = 52,
+): Container {
+  const container = new Container();
+  const entry: ChaoAtlasEntry = getChaoFrames(color);
+  const frameIdx = Math.abs(frame) % 3;
+  const lookupDir = direction === "R" ? "L" : direction;
+  const rect = entry[lookupDir][frameIdx];
+
+  const frameTexture = new Texture({
+    source: atlasTexture.source,
+    frame: new Rectangle(rect.x, rect.y, rect.w, rect.h),
+  });
+
+  const sprite = new Sprite(frameTexture);
+  const tint = ATLAS_TINT[color];
+  if (tint !== undefined) sprite.tint = tint;
+
+  const scale = size / rect.h;
+  sprite.scale.set(scale, scale);
+  if (direction === "R") {
+    sprite.anchor.set(1, 1);
+    sprite.scale.x = -scale;
+  } else {
+    sprite.anchor.set(0.5, 1);
+  }
+
+  container.addChild(sprite);
+
+  const s = size / 52;
+  const bodyCY = -20 * s;
+  drawAccessory(container, s, bodyCY, accessory, direction);
+
+  return container;
 }

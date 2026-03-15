@@ -20,7 +20,7 @@ import {
   hashStr,
 } from "./drawing-core";
 import { drawPlant } from "./drawing-furniture-a";
-import { drawChaoCharacter } from "./chao-renderer";
+import { drawChaoCharacter, drawChaoFromPreloadedAtlas } from "./chao-renderer";
 import { drawCoffeeMachine, drawCoffeeTable, drawHighTable, drawSofa, drawVendingMachine } from "./drawing-furniture-b";
 
 interface BuildBreakRoomParams {
@@ -153,12 +153,15 @@ export function buildBreakRoom({
     charContainer.cursor = "pointer";
     charContainer.on("pointerdown", () => cbRef.current.onSelectAgent(agent));
 
-    // Programmatic Chao character for break room
+    // Render Chao from atlas (falls back to programmatic)
     const spriteConfig = (agent as any).sprite_config as { color?: string; accessory?: string } | null;
     const chaoColor = spriteConfig?.color ?? "blue";
     const chaoAccessory = spriteConfig?.accessory ?? "none";
-    const dir = (spot.dir === "L" || spot.dir === "R") ? spot.dir : "D";
-    const chaoChar = drawChaoCharacter(chaoColor, chaoAccessory, dir as "D" | "L" | "R", 1, TARGET_CHAR_H * 0.85);
+    const dir = (spot.dir === "L" || spot.dir === "R") ? spot.dir as "L" | "R" : "D";
+    const atlasTexture = textures["chao-atlas"];
+    const chaoChar = atlasTexture
+      ? drawChaoFromPreloadedAtlas(atlasTexture, chaoColor, chaoAccessory, dir, 0, TARGET_CHAR_H * 0.85)
+      : drawChaoCharacter(chaoColor, chaoAccessory, dir, 1, TARGET_CHAR_H * 0.85);
     charContainer.addChild(chaoChar);
     breakRoom.addChild(charContainer);
 

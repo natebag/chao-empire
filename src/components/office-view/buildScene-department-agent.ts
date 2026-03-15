@@ -14,7 +14,7 @@ import {
 import { hashStr } from "./drawing-core";
 import { drawDesk } from "./drawing-furniture-a";
 import { drawMoodOrb, drawLevelBadge } from "./drawing-mood";
-import { drawChaoCharacter } from "./chao-renderer";
+import { drawChaoCharacter, drawChaoFromPreloadedAtlas } from "./chao-renderer";
 
 interface RenderDeskAgentAndSubClonesParams {
   room: Container;
@@ -63,11 +63,14 @@ export function renderDeskAgentAndSubClones({
   charContainer.cursor = "pointer";
   charContainer.on("pointerdown", () => cbRef.current.onSelectAgent(agent));
 
-  // Use programmatic Chao renderer based on sprite_config
+  // Render Chao from atlas spritesheet (falls back to programmatic if atlas not loaded)
   const spriteConfig = (agent as any).sprite_config as { color?: string; accessory?: string } | null;
   const chaoColor = spriteConfig?.color ?? "blue";
   const chaoAccessory = spriteConfig?.accessory ?? "none";
-  const chaoChar = drawChaoCharacter(chaoColor, chaoAccessory, "D", 1, TARGET_CHAR_H);
+  const atlasTexture = textures["chao-atlas"];
+  const chaoChar = atlasTexture
+    ? drawChaoFromPreloadedAtlas(atlasTexture, chaoColor, chaoAccessory, "D", 0, TARGET_CHAR_H)
+    : drawChaoCharacter(chaoColor, chaoAccessory, "D", 1, TARGET_CHAR_H);
   if (isOffline) {
     chaoChar.alpha = 0.3;
   }
