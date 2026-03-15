@@ -199,42 +199,7 @@ export function applyDefaultSeeds(db: DbLike): void {
       console.warn("[Chao Empire] Failed to recreate idx_departments_sort_order:", err);
     }
 
-    const insertAgentIfMissing = db.prepare(
-      `INSERT OR IGNORE INTO agents (id, name, name_ko, department_id, role, cli_provider, avatar_emoji, personality)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    );
-
-    // Check which agents exist by name to avoid duplicates
-    const existingNames = new Set(
-      (db.prepare("SELECT name FROM agents").all() as { name: string }[]).map((r) => r.name),
-    );
-
-    const newAgents: [string, string, string, string, string, string, string][] = [
-      // [name, name_ko, dept, role, provider, emoji, personality]
-      ["Luna", "루나", "design", "junior", "gemini", "🌙", "감성적인 UI 디자이너"],
-      ["Clio", "클리오", "planning", "senior", "claude", "📝", "데이터 기반 기획자"],
-      ["Turbo", "터보", "operations", "senior", "codex", "🚀", "자동화 전문가"],
-      ["Hawk", "호크", "qa", "team_leader", "claude", "🦅", "날카로운 품질 감시자"],
-      ["Lint", "린트", "qa", "senior", "opencode", "🔬", "꼼꼼한 테스트 전문가"],
-      ["Vault", "볼트S", "devsecops", "team_leader", "claude", "🛡️", "보안 아키텍트"],
-      ["Pipe", "파이프", "devsecops", "senior", "codex", "🔧", "CI/CD 파이프라인 전문가"],
-    ];
-
-    let added = 0;
-    for (const [name, nameKo, dept, role, provider, emoji, personality] of newAgents) {
-      if (!existingNames.has(name)) {
-        if (!existingDeptIds.has(dept)) {
-          console.warn(`[Chao Empire] Skip adding agent "${name}": missing department "${dept}"`);
-          continue;
-        }
-        try {
-          insertAgentIfMissing.run(randomUUID(), name, nameKo, dept, role, provider, emoji, personality);
-          added++;
-        } catch (err) {
-          console.warn(`[Chao Empire] Skip adding agent "${name}":`, err);
-        }
-      }
-    }
-    if (added > 0) console.log(`[Chao Empire] Added ${added} new agents`);
+    // No default agents — users create their own Chao team
+    // (Second upstream seed block removed)
   }
 }
