@@ -306,6 +306,8 @@ export type WSEventType =
   | "chat_stream"
   | "task_report"
   | "room_change"
+  | "agent_chat_bubble"
+  | "agent_leveled_up"
   | "connected";
 
 export interface WSEvent {
