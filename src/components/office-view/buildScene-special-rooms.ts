@@ -37,24 +37,24 @@ interface SpecialRoomTheme {
 /* ================================================================== */
 
 const GYM_THEME: SpecialRoomTheme = {
-  floor1: 0x2a4a2e,
-  floor2: 0x1e3a22,
-  wall: 0x3a6b3e,
-  accent: 0x4a8b4e,
+  floor1: 0xc8b888,
+  floor2: 0xb8a878,
+  wall: 0x8a7a5a,
+  accent: 0xc09030,
 };
 
 const LIBRARY_THEME: SpecialRoomTheme = {
-  floor1: 0x2e2a4a,
-  floor2: 0x221e3a,
-  wall: 0x3e3a6b,
-  accent: 0x4e4a8b,
+  floor1: 0xa0b898,
+  floor2: 0x90a888,
+  wall: 0x5a6a50,
+  accent: 0x80a060,
 };
 
 const SERVER_THEME: SpecialRoomTheme = {
-  floor1: 0x1e2a3a,
-  floor2: 0x162233,
-  wall: 0x2a4060,
-  accent: 0x3a6090,
+  floor1: 0x889cb8,
+  floor2: 0x788ca8,
+  wall: 0x4a6080,
+  accent: 0x60a0d0,
 };
 
 /* ================================================================== */
@@ -272,10 +272,10 @@ function buildGymRoom(
   wallClocksRef.current.push(drawWallClock(room, rx + rw - 20, ry + 18));
 
   // Room sign
-  drawRoomSign(room, rx + rw / 2, ry, "\u{1F4AA} Gym", 60, theme.accent, isDark);
+  drawRoomSign(room, rx + rw / 2, ry, "Training Grounds \u{1F4AA}", 110, theme.accent, isDark);
 
   // Wall text
-  drawWallText(room, rx + rw / 2, ry + 24, "GYM", theme.accent);
+  drawWallText(room, rx + rw / 2, ry + 24, "TRAINING", theme.accent);
 
   // Furniture
   const baseX = rx + 8;
@@ -321,10 +321,11 @@ function buildLibraryRoom(
   wallClocksRef.current.push(drawWallClock(room, rx + rw - 20, ry + 18));
 
   // Room sign
-  drawRoomSign(room, rx + rw / 2, ry, "\u{1F4DA} Library", 72, theme.accent, isDark);
+  drawRoomSign(room, rx + rw / 2, ry, "Ancient Tree \u{1F4DA}", 100, theme.accent, isDark);
 
   // Wall text
   drawWallText(room, rx + rw / 2, ry + 24, "LIBRARY", theme.accent);
+  // Note: wall text kept as "LIBRARY" per spec
 
   // Bookshelves along back wall
   const shelfBaseX = rx + 8;
@@ -374,7 +375,7 @@ function buildServerRoom(
   wallClocksRef.current.push(drawWallClock(room, rx + rw - 20, ry + 18));
 
   // Room sign
-  drawRoomSign(room, rx + rw / 2, ry, "\u{1F5A5}\u{FE0F} Server Room", 90, theme.accent, isDark);
+  drawRoomSign(room, rx + rw / 2, ry, "Crystal Cave \u{1F5A5}\u{FE0F}", 100, theme.accent, isDark);
 
   // Server racks
   const rackBaseX = rx + 10;

@@ -9,6 +9,7 @@ import {
   type RankedAgent,
 } from "./dashboard/HeroSections";
 import { DashboardDeptAndSquad, DashboardMissionLog, type DepartmentPerformance } from "./dashboard/OpsSections";
+import ProviderHealthPanel from "./dashboard/ProviderHealthPanel";
 import { DEPT_COLORS, useNow } from "./dashboard/model";
 
 interface DashboardProps {
