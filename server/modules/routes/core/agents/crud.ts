@@ -359,10 +359,10 @@ export function registerAgentCrudRoutes(ctx: RuntimeContext): void {
         typeof body.sprite_number === "number" && body.sprite_number > 0 ? body.sprite_number : null;
       const personality = typeof body.personality === "string" ? body.personality.trim() || null : null;
       const model_config = serializeJsonField(body.model_config);
-      const mood = typeof body.mood === "string" ? body.mood.trim() || null : null;
-      const energy = typeof body.energy === "number" ? body.energy : null;
-      const stats_xp = typeof body.xp === "number" ? body.xp : (typeof body.stats_xp === "number" ? body.stats_xp : null);
-      const level = typeof body.level === "number" ? body.level : null;
+      const mood = typeof body.mood === "string" ? body.mood.trim() || "happy" : "happy";
+      const energy = typeof body.energy === "number" ? body.energy : 100;
+      const stats_xp = typeof body.xp === "number" ? body.xp : (typeof body.stats_xp === "number" ? body.stats_xp : 0);
+      const level = typeof body.level === "number" ? body.level : 1;
       const sprite_config = serializeJsonField(body.sprite_config);
 
       const id = randomUUID();
