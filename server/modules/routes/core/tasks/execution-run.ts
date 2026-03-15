@@ -11,6 +11,7 @@ import {
   consumeInterruptPrompts,
   loadPendingInterruptPrompts,
 } from "../../../workflow/core/interrupt-injection-tools.ts";
+import { resolveRoom, assignRoom } from "../../../workflow/room-manager/index.ts";
 
 export type TaskRunRouteDeps = Pick<
   RuntimeContext,
@@ -96,6 +97,7 @@ export function registerTaskRunRoute(deps: TaskRunRouteDeps): void {
           project_id: string | null;
           workflow_pack_key: string | null;
           project_path: string | null;
+          task_type: string | null;
           status: string;
         }
       | undefined;
@@ -518,6 +520,11 @@ Whenever you complete a subtask, report it in this format:
       broadcast("agent_status", updatedAgent);
       notifyTaskStatus(id, task.title, "in_progress", taskLang);
 
+      // Room assignment: move agent to the appropriate room for this task
+      const apiRoom = resolveRoom(task.task_type ?? null, task.title, task.description, "working", false);
+      assignRoom(db, agentId, apiRoom);
+      broadcast("room_change", { agentId, room: apiRoom, reason: "task_started", timestamp: Date.now() });
+
       const assigneeName = getAgentDisplayName(agent as unknown as AgentRow, taskLang);
       const worktreeNote = pickL(
         l(
@@ -575,6 +582,11 @@ Whenever you complete a subtask, report it in this format:
       broadcast("agent_status", updatedAgent);
       notifyTaskStatus(id, task.title, "in_progress", taskLang);
 
+      // Room assignment: move agent to the appropriate room for this task
+      const httpRoom = resolveRoom(task.task_type ?? null, task.title, task.description, "working", false);
+      assignRoom(db, agentId, httpRoom);
+      broadcast("room_change", { agentId, room: httpRoom, reason: "task_started", timestamp: Date.now() });
+
       const assigneeName = getAgentDisplayName(agent as unknown as AgentRow, taskLang);
       const worktreeNote = pickL(
         l(
@@ -625,6 +637,11 @@ Whenever you complete a subtask, report it in this format:
     broadcast("agent_status", updatedAgent);
     notifyTaskStatus(id, task.title, "in_progress", taskLang);
 
+    // Room assignment: move agent to the appropriate room for this task
+    const cliRoom = resolveRoom(task.task_type ?? null, task.title, task.description, "working", false);
+    assignRoom(db, agentId, cliRoom);
+    broadcast("room_change", { agentId, room: cliRoom, reason: "task_started", timestamp: Date.now() });
+
     const assigneeName = getAgentDisplayName(agent as unknown as AgentRow, taskLang);
     const worktreeNote = pickL(
       l(
@@ -641,7 +658,7 @@ Whenever you complete a subtask, report it in this format:
           [`${assigneeName}가 '${task.title}' 작업을 시작했습니다.${worktreeNote}`],
           [`${assigneeName} started work on '${task.title}'.${worktreeNote}`],
           [`${assigneeName}が '${task.title}' の作業を開始しました。${worktreeNote}`],
-          [`${assigneeName} 已开始处理 '${task.title}'。${worktreeNote}`],
+          [`${assigneeName} 已开始처理 '${task.title}'。${worktreeNote}`],
         ),
         taskLang,
       ),

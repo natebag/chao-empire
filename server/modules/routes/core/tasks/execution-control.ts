@@ -12,6 +12,7 @@ import {
   queueInterruptPrompt,
   sanitizeInterruptPrompt,
 } from "../../../workflow/core/interrupt-injection-tools.ts";
+import { assignRoom } from "../../../workflow/room-manager/index.ts";
 
 export type TaskExecutionControlRouteDeps = Pick<
   RuntimeContext,
@@ -316,6 +317,9 @@ export function registerTaskExecutionControlRoutes(deps: TaskExecutionControlRou
         db.prepare("UPDATE agents SET status = 'idle', current_task_id = NULL WHERE id = ?").run(
           task.assigned_agent_id,
         );
+        // Room assignment: return agent to desk after task stop
+        assignRoom(db, task.assigned_agent_id, "desk");
+        broadcast("room_change", { agentId: task.assigned_agent_id, room: "desk", reason: "task_completed", timestamp: Date.now() });
       }
       const updatedTask = db.prepare("SELECT * FROM tasks WHERE id = ?").get(id);
       broadcast("task_update", updatedTask);
@@ -407,6 +411,9 @@ export function registerTaskExecutionControlRoutes(deps: TaskExecutionControlRou
 
     if (task.assigned_agent_id) {
       db.prepare("UPDATE agents SET status = 'idle', current_task_id = NULL WHERE id = ?").run(task.assigned_agent_id);
+      // Room assignment: return agent to desk after task stop
+      assignRoom(db, task.assigned_agent_id, "desk");
+      broadcast("room_change", { agentId: task.assigned_agent_id, room: "desk", reason: "task_completed", timestamp: Date.now() });
       const updatedAgent = db.prepare("SELECT * FROM agents WHERE id = ?").get(task.assigned_agent_id);
       broadcast("agent_status", updatedAgent);
     }

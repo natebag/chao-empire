@@ -6,6 +6,7 @@ import {
   resolveVideoArtifactSpecForTask,
 } from "../packs/video-artifact.ts";
 import { evaluateRemotionOnlyGateFromLogFiles } from "../packs/video-render-engine-gate.ts";
+import { assignRoom } from "../room-manager/index.ts";
 
 type CreateRunCompleteHandlerDeps = Record<string, any>;
 
@@ -292,6 +293,10 @@ export function createRunCompleteHandler(deps: CreateRunCompleteHandlerDeps) {
           "UPDATE agents SET stats_tasks_done = stats_tasks_done + 1, stats_xp = stats_xp + 10 WHERE id = ?",
         ).run(task.assigned_agent_id);
       }
+
+      // Room assignment: return agent to desk after task run completes
+      assignRoom(db, task.assigned_agent_id, "desk");
+      broadcast("room_change", { agentId: task.assigned_agent_id, room: "desk", reason: "task_completed", timestamp: Date.now() });
 
       const agent = db.prepare("SELECT * FROM agents WHERE id = ?").get(task.assigned_agent_id) as
         | Record<string, unknown>

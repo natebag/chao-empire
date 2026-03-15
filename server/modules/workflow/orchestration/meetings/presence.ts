@@ -1,4 +1,5 @@
 import type { Lang } from "../../../../types/lang.ts";
+import { assignRoom } from "../../room-manager/index.ts";
 
 interface AgentRow {
   id: string;
@@ -92,6 +93,9 @@ export function createMeetingPresenceTools(deps: PresenceDeps) {
   function callLeadersToCeoOffice(taskId: string, leaders: AgentRow[], phase: "kickoff" | "review"): void {
     leaders.slice(0, 6).forEach((leader, seatIndex) => {
       markAgentInMeeting(leader.id, 600_000, seatIndex, phase, taskId);
+      // Room assignment: move leader to meeting room
+      assignRoom(db, leader.id, "meeting");
+      broadcast("room_change", { agentId: leader.id, room: "meeting", reason: "meeting_started", timestamp: Date.now() });
       broadcast("ceo_office_call", {
         from_agent_id: leader.id,
         seat_index: seatIndex,
@@ -110,6 +114,9 @@ export function createMeetingPresenceTools(deps: PresenceDeps) {
       meetingPhaseByAgent.delete(leader.id);
       meetingTaskIdByAgent.delete(leader.id);
       meetingReviewDecisionByAgent.delete(leader.id);
+      // Room assignment: return leader to desk after meeting
+      assignRoom(db, leader.id, "desk");
+      broadcast("room_change", { agentId: leader.id, room: "desk", reason: "meeting_ended", timestamp: Date.now() });
       broadcast("ceo_office_call", {
         from_agent_id: leader.id,
         task_id: taskId,

@@ -7,6 +7,7 @@ import type { RuntimeContext } from "../../../../types/runtime-context.ts";
 import type { MeetingMinuteEntryRow, MeetingMinutesRow } from "../../shared/types.ts";
 import { isWorkflowPackKey } from "../../../workflow/packs/definitions.ts";
 import { resolveWorkflowPackKeyForTask } from "../../../workflow/packs/task-pack-resolver.ts";
+import { resolveRoom, assignRoom } from "../../../workflow/room-manager/index.ts";
 
 export type TaskCrudRouteDeps = Pick<
   RuntimeContext,
@@ -511,6 +512,24 @@ export function registerTaskCrudRoutes(deps: TaskCrudRouteDeps): void {
       }
     }
 
+    // Room assignment: update agent room based on task status change
+    if (nextStatus) {
+      const agentId = (body as any).assigned_agent_id ?? (existing as any).assigned_agent_id;
+      if (agentId) {
+        if (nextStatus === "in_progress") {
+          const taskTitle = (body as any).title ?? (existing as any).title ?? "";
+          const taskDesc = (body as any).description ?? (existing as any).description ?? null;
+          const taskType = (body as any).task_type ?? (existing as any).task_type ?? null;
+          const room = resolveRoom(taskType, taskTitle, taskDesc, "working", false);
+          assignRoom(db, agentId, room);
+          broadcast("room_change", { agentId, room, reason: "task_started", timestamp: Date.now() });
+        } else if (nextStatus === "done" || nextStatus === "cancelled") {
+          assignRoom(db, agentId, "desk");
+          broadcast("room_change", { agentId, room: "desk", reason: "task_completed", timestamp: Date.now() });
+        }
+      }
+    }
+
     appendTaskLog(id, "system", `Task updated: ${Object.keys(body as object).join(", ")}`);
 
     const updated = db.prepare("SELECT * FROM tasks WHERE id = ?").get(id);
@@ -559,6 +578,9 @@ export function registerTaskCrudRoutes(deps: TaskCrudRouteDeps): void {
         existing.assigned_agent_id,
         id,
       );
+      // Room assignment: return agent to desk after task deletion
+      assignRoom(db, existing.assigned_agent_id, "desk");
+      broadcast("room_change", { agentId: existing.assigned_agent_id, room: "desk", reason: "task_completed", timestamp: Date.now() });
     }
 
     db.prepare("DELETE FROM task_logs WHERE task_id = ?").run(id);

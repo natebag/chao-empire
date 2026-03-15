@@ -1,5 +1,6 @@
 import path from "node:path";
 import { resolveWorkflowPackKeyForTask } from "../packs/task-pack-resolver.ts";
+import { assignRoom } from "../room-manager/index.ts";
 
 type CreateReportWorkflowToolsDeps = Record<string, any>;
 
@@ -158,6 +159,12 @@ export function createReportWorkflowTools(deps: CreateReportWorkflowToolsDeps) {
     reviewRoundState.delete(task.id);
     reviewInFlight.delete(task.id);
     endTaskExecutionSession(task.id, "task_done_no_review");
+
+    // Room assignment: return agent to desk after task completion (no review)
+    if (task.assigned_agent_id) {
+      assignRoom(db, task.assigned_agent_id, "desk");
+      broadcast("room_change", { agentId: task.assigned_agent_id, room: "desk", reason: "task_completed", timestamp: Date.now() });
+    }
 
     const updatedTask = db.prepare("SELECT * FROM tasks WHERE id = ?").get(task.id);
     broadcast("task_update", updatedTask);

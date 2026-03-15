@@ -8,6 +8,7 @@ import {
 import { evaluateRemotionOnlyGateFromLogFiles } from "../packs/video-render-engine-gate.ts";
 import { readYoloModeEnabled } from "../../routes/ops/messages/decision-inbox/yolo-mode.ts";
 import { reconcileVideoRenderDelegationState } from "./video-render-delegation-state.ts";
+import { assignRoom } from "../room-manager/index.ts";
 
 type CreateReviewFinalizeToolsDeps = Record<string, any>;
 
@@ -610,6 +611,15 @@ export function createReviewFinalizeTools(deps: CreateReviewFinalizeToolsDeps) {
 
       appendTaskLog(taskId, "system", "Status → done (all leaders approved)");
       endTaskExecutionSession(taskId, "task_done");
+
+      // Room assignment: return agent to desk after review approval
+      const doneTaskRow = db.prepare("SELECT assigned_agent_id FROM tasks WHERE id = ?").get(taskId) as
+        | { assigned_agent_id: string | null }
+        | undefined;
+      if (doneTaskRow?.assigned_agent_id) {
+        assignRoom(db, doneTaskRow.assigned_agent_id, "desk");
+        broadcast("room_change", { agentId: doneTaskRow.assigned_agent_id, room: "desk", reason: "task_completed", timestamp: Date.now() });
+      }
 
       const updatedTask = db.prepare("SELECT * FROM tasks WHERE id = ?").get(taskId);
       broadcast("task_update", updatedTask);
