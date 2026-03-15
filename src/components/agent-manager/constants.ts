@@ -59,6 +59,9 @@ export const EMOJI_GROUPS: { label: string; labelEn: string; emojis: string[] }[
   },
 ];
 
+export const MODEL_PROVIDERS = ["", "anthropic", "openai", "google", "kimi", "ollama", "custom"] as const;
+export const MOOD_OPTIONS = ["", "happy", "focused", "tired", "frustrated", "excited", "curious"] as const;
+
 export const BLANK: FormData = {
   name: "",
   name_ko: "",
@@ -70,6 +73,12 @@ export const BLANK: FormData = {
   avatar_emoji: "🤖",
   sprite_number: null,
   personality: "",
+  model_provider: "",
+  model_name: "",
+  fallback_provider: "",
+  fallback_model: "",
+  mood: "",
+  energy: "",
 };
 
 export const DEPT_COLORS = [

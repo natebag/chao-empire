@@ -119,6 +119,12 @@ export default function AgentManager({
         avatar_emoji: agent.avatar_emoji,
         sprite_number: computed,
         personality: agent.personality || "",
+        model_provider: agent.model_config?.provider || "",
+        model_name: agent.model_config?.model || "",
+        fallback_provider: agent.model_config?.fallbacks?.[0]?.provider || "",
+        fallback_model: agent.model_config?.fallbacks?.[0]?.model || "",
+        mood: agent.mood || "",
+        energy: agent.energy ?? "",
       });
       setShowModal(true);
     },
@@ -135,6 +141,23 @@ export default function AgentManager({
     setSaving(true);
     try {
       const departmentId = form.department_id.trim();
+      const modelConfig = form.model_provider
+        ? {
+            provider: form.model_provider,
+            model: form.model_name,
+            ...(form.fallback_provider
+              ? {
+                  fallbacks: [
+                    {
+                      provider: form.fallback_provider,
+                      model: form.fallback_model,
+                      triggerOn: "rate_limit",
+                    },
+                  ],
+                }
+              : {}),
+          }
+        : null;
       const basePayload = {
         name: form.name.trim(),
         name_ko: form.name_ko.trim(),
@@ -145,6 +168,9 @@ export default function AgentManager({
         avatar_emoji: form.avatar_emoji || "🤖",
         sprite_number: form.sprite_number,
         personality: form.personality.trim() || null,
+        model_config: modelConfig,
+        mood: form.mood || null,
+        energy: form.energy === "" ? null : form.energy,
       };
       if (isIsolatedPack) {
         if (useDbBackedPack) {

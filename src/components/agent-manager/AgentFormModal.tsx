@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Department } from "../../types";
 import { localeName, useI18n } from "../../i18n";
 import * as api from "../../api";
-import { CLI_PROVIDERS, ROLE_BADGE, ROLE_LABEL, ROLES } from "./constants";
+import { CLI_PROVIDERS, MODEL_PROVIDERS, MOOD_OPTIONS, ROLE_BADGE, ROLE_LABEL, ROLES } from "./constants";
 import EmojiPicker from "./EmojiPicker";
 import type { FormData } from "./types";
 
@@ -476,6 +476,136 @@ export default function AgentFormModal({
               </div>
             </div>
           )}
+        </div>
+
+        {/* ── Model Configuration ── */}
+        <div className="mt-5 pt-4" style={{ borderTop: "1px solid var(--th-card-border)" }}>
+          <details>
+            <summary
+              className="text-[10px] font-semibold uppercase tracking-widest cursor-pointer select-none mb-3 flex items-center gap-1.5"
+              style={{ color: "var(--th-text-muted)" }}
+            >
+              <span className="text-[8px]">▶</span>
+              {tr("모델 설정", "Model Configuration")}
+            </summary>
+            <div className="space-y-3">
+              {/* Provider + Model */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--th-text-secondary)" }}>
+                    {tr("제공자", "Provider")}
+                  </label>
+                  <select
+                    value={form.model_provider}
+                    onChange={(e) => setForm({ ...form, model_provider: e.target.value })}
+                    className={`${inputCls} cursor-pointer`}
+                    style={inputStyle}
+                  >
+                    {MODEL_PROVIDERS.map((p) => (
+                      <option key={p} value={p}>
+                        {p === "" ? tr("시스템 기본값 사용", "Use system default") : p}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--th-text-secondary)" }}>
+                    {tr("모델", "Model")}
+                  </label>
+                  <input
+                    type="text"
+                    value={form.model_name}
+                    onChange={(e) => setForm({ ...form, model_name: e.target.value })}
+                    placeholder="e.g. claude-opus-4-6, gpt-5-mini"
+                    className={inputCls}
+                    style={inputStyle}
+                  />
+                </div>
+              </div>
+              {/* Fallback Provider + Model */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--th-text-secondary)" }}>
+                    {tr("폴백 제공자", "Fallback Provider")}
+                  </label>
+                  <input
+                    type="text"
+                    value={form.fallback_provider}
+                    onChange={(e) => setForm({ ...form, fallback_provider: e.target.value })}
+                    placeholder="e.g. openai"
+                    className={inputCls}
+                    style={inputStyle}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--th-text-secondary)" }}>
+                    {tr("폴백 모델", "Fallback Model")}
+                  </label>
+                  <input
+                    type="text"
+                    value={form.fallback_model}
+                    onChange={(e) => setForm({ ...form, fallback_model: e.target.value })}
+                    placeholder="e.g. gpt-4o"
+                    className={inputCls}
+                    style={inputStyle}
+                  />
+                </div>
+              </div>
+              <p className="text-[11px]" style={{ color: "var(--th-text-muted)" }}>
+                {tr(
+                  "비워두면 시스템 기본 모델을 사용합니다",
+                  "Leave empty to use the system default model",
+                )}
+              </p>
+            </div>
+          </details>
+        </div>
+
+        {/* ── Chao Empire: Mood & Energy ── */}
+        <div className="mt-5 pt-4" style={{ borderTop: "1px solid var(--th-card-border)" }}>
+          <div
+            className="text-[10px] font-semibold uppercase tracking-widest mb-3"
+            style={{ color: "var(--th-text-muted)" }}
+          >
+            {tr("차오 상태", "Chao Status")}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--th-text-secondary)" }}>
+                {tr("기분", "Mood")}
+              </label>
+              <select
+                value={form.mood}
+                onChange={(e) => setForm({ ...form, mood: e.target.value as FormData["mood"] })}
+                className={`${inputCls} cursor-pointer`}
+                style={inputStyle}
+              >
+                {MOOD_OPTIONS.map((m) => (
+                  <option key={m} value={m}>
+                    {m === "" ? tr("— 기본값 —", "— Default —") : m}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs mb-1.5 font-medium" style={{ color: "var(--th-text-secondary)" }}>
+                {tr("에너지", "Energy")} <span className="opacity-50">(0–100)</span>
+              </label>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                value={form.energy}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setForm({ ...form, energy: v === "" ? "" : Math.max(0, Math.min(100, Number(v))) });
+                }}
+                placeholder="50"
+                className={inputCls}
+                style={inputStyle}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Actions — full width */}

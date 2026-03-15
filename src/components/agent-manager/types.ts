@@ -22,6 +22,12 @@ export interface FormData {
   avatar_emoji: string;
   sprite_number: number | null;
   personality: string;
+  model_provider: string;
+  model_name: string;
+  fallback_provider: string;
+  fallback_model: string;
+  mood: import("../../types").AgentMood | "";
+  energy: number | "";
 }
 
 export interface DeptForm {
