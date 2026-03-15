@@ -4,17 +4,17 @@ import type { MeetingReviewDecision } from "../../types";
 import type { RoomTheme } from "./model";
 
 const OFFICE_PASTEL_LIGHT = {
-  creamWhite: 0xf8f3ec,
-  creamDeep: 0xebdfcf,
-  softMint: 0xbfded5,
-  softMintDeep: 0x8fbcb0,
-  dustyRose: 0xd5a5ae,
-  dustyRoseDeep: 0xb67d89,
-  warmSand: 0xd6b996,
-  warmWood: 0xb8906d,
-  cocoa: 0x6f4d3a,
-  ink: 0x2f2530,
-  slate: 0x586378,
+  creamWhite: 0xe8f5e0,    // soft garden green
+  creamDeep: 0xd4e8c8,     // deeper garden green
+  softMint: 0x8bc4a0,      // garden mint
+  softMintDeep: 0x6aab82,  // deeper mint
+  dustyRose: 0xdbb08a,     // warm wood
+  dustyRoseDeep: 0xc49a6e, // deeper wood
+  warmSand: 0xc8b890,      // sandy path
+  warmWood: 0xa8906a,      // garden wood
+  cocoa: 0x5a3d28,         // dark bark
+  ink: 0x2a3020,           // dark forest text
+  slate: 0x4a6050,         // muted forest gray-green
 };
 
 /* ── Dark (late-night coding session) palette ── */
@@ -35,10 +35,7 @@ const OFFICE_PASTEL_DARK = {
 let OFFICE_PASTEL = OFFICE_PASTEL_LIGHT;
 
 const DEFAULT_CEO_THEME_LIGHT: RoomTheme = {
-  floor1: 0xe5d9b9,
-  floor2: 0xdfd0a8,
-  wall: 0x998243,
-  accent: 0xa77d0c,
+  floor1: 0xc8d8a8, floor2: 0xb8c898, wall: 0x7a9a5a, accent: 0x8ab040,
 };
 const DEFAULT_CEO_THEME_DARK: RoomTheme = {
   floor1: 0x101020,
@@ -48,10 +45,7 @@ const DEFAULT_CEO_THEME_DARK: RoomTheme = {
 };
 
 const DEFAULT_BREAK_THEME_LIGHT: RoomTheme = {
-  floor1: 0xf7e2b7,
-  floor2: 0xf6dead,
-  wall: 0xa99c83,
-  accent: 0xf0c878,
+  floor1: 0xa8d0e0, floor2: 0x98c0d4, wall: 0x6a9aaa, accent: 0x40a0c0,
 };
 const DEFAULT_BREAK_THEME_DARK: RoomTheme = {
   floor1: 0x141210,
@@ -409,12 +403,12 @@ const BREAK_SPOTS = [
 ];
 
 const DEPT_THEME_LIGHT: Record<string, RoomTheme> = {
-  dev: { floor1: 0xd8e8f5, floor2: 0xcce1f2, wall: 0x6c96b7, accent: 0x5a9fd4 },
-  design: { floor1: 0xe8def2, floor2: 0xe1d4ee, wall: 0x9378ad, accent: 0x9a6fc4 },
-  planning: { floor1: 0xf0e1c5, floor2: 0xeddaba, wall: 0xae9871, accent: 0xd4a85a },
-  operations: { floor1: 0xd0eede, floor2: 0xc4ead5, wall: 0x6eaa89, accent: 0x5ac48a },
-  qa: { floor1: 0xf0cbcb, floor2: 0xedc0c0, wall: 0xae7979, accent: 0xd46a6a },
-  devsecops: { floor1: 0xf0d5c5, floor2: 0xedcdba, wall: 0xae8871, accent: 0xd4885a },
+  dev:        { floor1: 0xc0d8a0, floor2: 0xb0c890, wall: 0x6a8a50, accent: 0x4a8a30 },
+  design:     { floor1: 0xe0c8e0, floor2: 0xd4b8d4, wall: 0x8a6a8a, accent: 0xa060a0 },
+  planning:   { floor1: 0xe8d8a8, floor2: 0xdccda0, wall: 0x9a8a60, accent: 0xc0a040 },
+  operations: { floor1: 0xa8d4b8, floor2: 0x98c8a8, wall: 0x5a8a6a, accent: 0x40a060 },
+  qa:         { floor1: 0xe0b8a0, floor2: 0xd4a890, wall: 0x8a6a50, accent: 0xc06030 },
+  devsecops:  { floor1: 0xb8c8d8, floor2: 0xa8b8c8, wall: 0x6a7a8a, accent: 0x5080a0 },
 };
 const DEPT_THEME_DARK: Record<string, RoomTheme> = {
   dev: { floor1: 0x0c1620, floor2: 0x0a121c, wall: 0x1e3050, accent: 0x285890 },

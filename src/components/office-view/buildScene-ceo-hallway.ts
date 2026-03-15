@@ -54,12 +54,12 @@ export function buildCeoAndHallway({
   ceoOfficeRectRef,
 }: BuildCeoAndHallwayParams): void {
   const bg = new Graphics();
-  const bgFill = isDark ? 0x0e0e1c : 0xf5f0e8;
-  const bgGradFrom = isDark ? 0x121222 : 0xf8f4ec;
-  const bgGradTo = isDark ? 0x0a0a18 : 0xf0ece4;
-  const bgStrokeInner = isDark ? 0x2a2a48 : 0xd8cfc0;
-  const bgStrokeOuter = isDark ? 0x222240 : 0xe0d8cc;
-  const bgDotColor = isDark ? 0x2a2a48 : 0xd0c8b8;
+  const bgFill = isDark ? 0x0a1a0e : 0xd4e8c8;
+  const bgGradFrom = isDark ? 0x0e2214 : 0xe0f0d8;
+  const bgGradTo = isDark ? 0x081208 : 0xc8dab8;
+  const bgStrokeInner = isDark ? 0x1a3a20 : 0xa8c098;
+  const bgStrokeOuter = isDark ? 0x142a18 : 0xb0c8a0;
+  const bgDotColor = isDark ? 0x1a3a20 : 0x90b080;
   bg.roundRect(0, 0, OFFICE_W, totalH, 6).fill(bgFill);
   drawBandGradient(bg, 2, 2, OFFICE_W - 4, totalH - 4, bgGradFrom, bgGradTo, 14, 0.82);
   bg.roundRect(2, 2, OFFICE_W - 4, totalH - 4, 5).stroke({ width: 1.5, color: bgStrokeInner, alpha: 0.55 });
