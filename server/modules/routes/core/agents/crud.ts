@@ -45,6 +45,36 @@ export function registerAgentCrudRoutes(ctx: RuntimeContext): void {
     return typeof value === "string" ? value.trim() : "";
   }
 
+  function serializeJsonField(value: unknown): string | null {
+    if (value === null || value === undefined) return null;
+    if (typeof value === "string") return value;
+    return JSON.stringify(value);
+  }
+
+  function parseJsonField(value: unknown): unknown {
+    if (value === null || value === undefined) return null;
+    if (typeof value === "string") {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return value;
+      }
+    }
+    return value;
+  }
+
+  function hydrateAgent<T>(agent: T): T {
+    if (!agent || typeof agent !== "object") return agent;
+    const record = agent as Record<string, unknown>;
+    if ("model_config" in record) {
+      record.model_config = parseJsonField(record.model_config);
+    }
+    if ("sprite_config" in record) {
+      record.sprite_config = parseJsonField(record.sprite_config);
+    }
+    return agent;
+  }
+
   function parseWorkflowPackKey(value: unknown): WorkflowPackKey | null {
     return parseWorkflowPackKeyInput(value);
   }
@@ -210,7 +240,7 @@ export function registerAgentCrudRoutes(ctx: RuntimeContext): void {
         )
         .all();
     }
-    res.json({ agents });
+    res.json({ agents: (agents as unknown[]).map(hydrateAgent) });
   });
 
   app.get("/api/meeting-presence", (_req, res) => {
@@ -287,7 +317,7 @@ export function registerAgentCrudRoutes(ctx: RuntimeContext): void {
       .prepare("SELECT * FROM tasks WHERE assigned_agent_id = ? ORDER BY updated_at DESC LIMIT 10")
       .all(id);
 
-    res.json({ agent, recent_tasks: recentTasks });
+    res.json({ agent: hydrateAgent(agent), recent_tasks: recentTasks });
   });
 
   app.post("/api/agents", (req, res) => {
@@ -328,13 +358,19 @@ export function registerAgentCrudRoutes(ctx: RuntimeContext): void {
       const sprite_number =
         typeof body.sprite_number === "number" && body.sprite_number > 0 ? body.sprite_number : null;
       const personality = typeof body.personality === "string" ? body.personality.trim() || null : null;
+      const model_config = serializeJsonField(body.model_config);
+      const mood = typeof body.mood === "string" ? body.mood.trim() || null : null;
+      const energy = typeof body.energy === "number" ? body.energy : null;
+      const xp = typeof body.xp === "number" ? body.xp : null;
+      const level = typeof body.level === "number" ? body.level : null;
+      const sprite_config = serializeJsonField(body.sprite_config);
 
       const id = randomUUID();
       try {
         if (hasAgentWorkflowPackColumn) {
           db.prepare(
-            `INSERT INTO agents (id, name, name_ko, name_ja, name_zh, department_id, workflow_pack_key, role, cli_provider, avatar_emoji, sprite_number, personality)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO agents (id, name, name_ko, name_ja, name_zh, department_id, workflow_pack_key, role, cli_provider, avatar_emoji, sprite_number, personality, model_config, mood, energy, xp, level, sprite_config)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           ).run(
             id,
             name,
@@ -348,11 +384,17 @@ export function registerAgentCrudRoutes(ctx: RuntimeContext): void {
             avatar_emoji,
             sprite_number,
             personality,
+            model_config,
+            mood,
+            energy,
+            xp,
+            level,
+            sprite_config,
           );
         } else {
           db.prepare(
-            `INSERT INTO agents (id, name, name_ko, name_ja, name_zh, department_id, role, cli_provider, avatar_emoji, sprite_number, personality)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO agents (id, name, name_ko, name_ja, name_zh, department_id, role, cli_provider, avatar_emoji, sprite_number, personality, model_config, mood, energy, xp, level, sprite_config)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           ).run(
             id,
             name,
@@ -365,6 +407,12 @@ export function registerAgentCrudRoutes(ctx: RuntimeContext): void {
             avatar_emoji,
             sprite_number,
             personality,
+            model_config,
+            mood,
+            energy,
+            xp,
+            level,
+            sprite_config,
           );
         }
       } catch (err: any) {
@@ -405,8 +453,8 @@ export function registerAgentCrudRoutes(ctx: RuntimeContext): void {
           )
           .get(id);
       }
-      broadcast("agent_created", created);
-      res.status(201).json({ ok: true, agent: created });
+      broadcast("agent_created", hydrateAgent(created));
+      res.status(201).json({ ok: true, agent: hydrateAgent(created) });
     } catch (err) {
       console.error("[agents] POST failed:", err);
       res.status(500).json({ error: "internal_error" });
@@ -536,6 +584,13 @@ export function registerAgentCrudRoutes(ctx: RuntimeContext): void {
       }
     }
 
+    if ("model_config" in body) {
+      body.model_config = serializeJsonField(body.model_config);
+    }
+    if ("sprite_config" in body) {
+      body.sprite_config = serializeJsonField(body.sprite_config);
+    }
+
     const requestedPackKey = parseWorkflowPackKey(body.workflow_pack_key);
     if ("workflow_pack_key" in body) {
       if (!requestedPackKey) {
@@ -580,6 +635,12 @@ export function registerAgentCrudRoutes(ctx: RuntimeContext): void {
       "avatar_emoji",
       "sprite_number",
       "personality",
+      "model_config",
+      "mood",
+      "energy",
+      "xp",
+      "level",
+      "sprite_config",
       "status",
       "current_task_id",
       "acts_as_planning_leader",
@@ -716,7 +777,7 @@ export function registerAgentCrudRoutes(ctx: RuntimeContext): void {
     }
 
     const updated = db.prepare("SELECT * FROM agents WHERE id = ?").get(id);
-    broadcast("agent_status", updated);
-    res.json({ ok: true, agent: updated });
+    broadcast("agent_status", hydrateAgent(updated));
+    res.json({ ok: true, agent: hydrateAgent(updated) });
   });
 }
