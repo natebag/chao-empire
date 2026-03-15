@@ -295,11 +295,24 @@ export function createRunCompleteHandler(deps: CreateRunCompleteHandlerDeps) {
       } else {
         awardXP(db, task.assigned_agent_id, "task_failed", broadcast);
         applyMoodTrigger(db, task.assigned_agent_id, "task_failed", broadcast);
+
+        // CEO escalation: agent walks to CEO office when stuck
+        assignRoom(db, task.assigned_agent_id, "ceo");
+        broadcast("room_change", { agentId: task.assigned_agent_id, room: "ceo", reason: "escalation", timestamp: Date.now() });
+        broadcast("ceo_office_call", {
+          from_agent_id: task.assigned_agent_id,
+          action: "escalation",
+          message: `I'm stuck on "${task.title}" — can you help?`,
+          task_id: task.id,
+          timestamp: Date.now(),
+        });
       }
 
-      // Room assignment: return agent to desk after task run completes
-      assignRoom(db, task.assigned_agent_id, "desk");
-      broadcast("room_change", { agentId: task.assigned_agent_id, room: "desk", reason: "task_completed", timestamp: Date.now() });
+      // Room assignment: return agent to desk after task run completes (success path)
+      if (finalExitCode === 0) {
+        assignRoom(db, task.assigned_agent_id, "desk");
+        broadcast("room_change", { agentId: task.assigned_agent_id, room: "desk", reason: "task_completed", timestamp: Date.now() });
+      }
 
       const agent = db.prepare("SELECT * FROM agents WHERE id = ?").get(task.assigned_agent_id) as
         | Record<string, unknown>
