@@ -32,6 +32,7 @@ import { registerAgentRoutes } from "./core/agents/index.ts";
 import { registerDepartmentRoutes } from "./core/departments.ts";
 import { registerModelRoutes } from "./core/models/index.ts";
 import { registerRoomRoutes } from "./core/rooms/index.ts";
+import { registerMemoryRoutes } from "./core/memories/index.ts";
 import { registerGitHubRoutes } from "./core/github-routes.ts";
 import { registerProjectRoutes } from "./core/projects.ts";
 import { registerTaskCrudRoutes } from "./core/tasks/crud.ts";
@@ -366,6 +367,11 @@ export function registerRoutesPartA(ctx: RuntimeContext): Record<string, never> 
   // Chao Empire: Room System
   // ---------------------------------------------------------------------------
   registerRoomRoutes({ app, db, broadcast: __ctx.broadcast });
+
+  // ---------------------------------------------------------------------------
+  // Chao Empire: Agent Memories
+  // ---------------------------------------------------------------------------
+  registerMemoryRoutes({ app, db });
 
   // ---------------------------------------------------------------------------
   // Tasks

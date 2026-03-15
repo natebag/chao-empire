@@ -8,6 +8,7 @@ import {
 import { evaluateRemotionOnlyGateFromLogFiles } from "../packs/video-render-engine-gate.ts";
 import { assignRoom } from "../room-manager/index.ts";
 import { applyMoodTrigger, awardXP } from "../mood-engine/index.ts";
+import { memorizeTaskCompletion } from "../agent-memory/index.ts";
 
 type CreateRunCompleteHandlerDeps = Record<string, any>;
 
@@ -292,9 +293,11 @@ export function createRunCompleteHandler(deps: CreateRunCompleteHandlerDeps) {
       if (finalExitCode === 0) {
         awardXP(db, task.assigned_agent_id, "task_completed", broadcast);
         applyMoodTrigger(db, task.assigned_agent_id, "task_completed", broadcast);
+        memorizeTaskCompletion(db, task.assigned_agent_id, task.title, task.task_type ?? "general", true, broadcast);
       } else {
         awardXP(db, task.assigned_agent_id, "task_failed", broadcast);
         applyMoodTrigger(db, task.assigned_agent_id, "task_failed", broadcast);
+        memorizeTaskCompletion(db, task.assigned_agent_id, task.title, task.task_type ?? "general", false, broadcast);
 
         // CEO escalation: agent walks to CEO office when stuck
         assignRoom(db, task.assigned_agent_id, "ceo");
