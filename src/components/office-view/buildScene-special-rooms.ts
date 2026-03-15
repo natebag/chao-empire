@@ -325,7 +325,6 @@ function buildLibraryRoom(
 
   // Wall text
   drawWallText(room, rx + rw / 2, ry + 24, "LIBRARY", theme.accent);
-  // Note: wall text kept as "LIBRARY" per spec
 
   // Bookshelves along back wall
   const shelfBaseX = rx + 8;
@@ -376,6 +375,9 @@ function buildServerRoom(
 
   // Room sign
   drawRoomSign(room, rx + rw / 2, ry, "Crystal Cave \u{1F5A5}\u{FE0F}", 100, theme.accent, isDark);
+
+  // Wall text
+  drawWallText(room, rx + rw / 2, ry + 24, "CRYSTAL", theme.accent);
 
   // Server racks
   const rackBaseX = rx + 10;

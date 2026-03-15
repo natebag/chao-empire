@@ -20,6 +20,7 @@ import {
   hashStr,
 } from "./drawing-core";
 import { drawPlant } from "./drawing-furniture-a";
+import { drawChaoCharacter } from "./chao-renderer";
 import { drawCoffeeMachine, drawCoffeeTable, drawHighTable, drawSofa, drawVendingMachine } from "./drawing-furniture-b";
 
 interface BuildBreakRoomParams {
@@ -146,28 +147,19 @@ export function buildBreakRoom({
 
     agentPosRef.current.set(agent.id, { x: spotX, y: spotY });
 
-    const spriteNum = spriteMap.get(agent.id) ?? (seed % 13) + 1;
     const charContainer = new Container();
     charContainer.position.set(spotX, spotY);
     charContainer.eventMode = "static";
     charContainer.cursor = "pointer";
     charContainer.on("pointerdown", () => cbRef.current.onSelectAgent(agent));
 
-    const dirKey = `${spriteNum}-${spot.dir}-1`;
-    const fallbackKey = `${spriteNum}-D-1`;
-    const texture = textures[dirKey] || textures[fallbackKey];
-
-    if (texture) {
-      const sprite = new Sprite(texture);
-      sprite.anchor.set(0.5, 1);
-      const scale = (TARGET_CHAR_H * 0.85) / sprite.texture.height;
-      sprite.scale.set(scale);
-      charContainer.addChild(sprite);
-    } else {
-      const fallback = new Text({ text: agent.avatar_emoji || "🤖", style: new TextStyle({ fontSize: 20 }) });
-      fallback.anchor.set(0.5, 1);
-      charContainer.addChild(fallback);
-    }
+    // Programmatic Chao character for break room
+    const spriteConfig = (agent as any).sprite_config as { color?: string; accessory?: string } | null;
+    const chaoColor = spriteConfig?.color ?? "blue";
+    const chaoAccessory = spriteConfig?.accessory ?? "none";
+    const dir = (spot.dir === "L" || spot.dir === "R") ? spot.dir : "D";
+    const chaoChar = drawChaoCharacter(chaoColor, chaoAccessory, dir as "D" | "L" | "R", 1, TARGET_CHAR_H * 0.85);
+    charContainer.addChild(chaoChar);
     breakRoom.addChild(charContainer);
 
     breakAnimItemsRef.current.push({

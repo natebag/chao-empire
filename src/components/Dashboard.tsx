@@ -202,6 +202,8 @@ export default function Dashboard({ stats, agents, tasks, companyName, onPrimary
         t={t}
       />
 
+      <ProviderHealthPanel />
+
       <DashboardDeptAndSquad
         deptData={deptData}
         workingAgents={workingAgents}

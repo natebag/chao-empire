@@ -14,6 +14,7 @@ import {
 import { hashStr } from "./drawing-core";
 import { drawDesk } from "./drawing-furniture-a";
 import { drawMoodOrb, drawLevelBadge } from "./drawing-mood";
+import { drawChaoCharacter } from "./chao-renderer";
 
 interface RenderDeskAgentAndSubClonesParams {
   room: Container;
@@ -56,35 +57,21 @@ export function renderDeskAgentAndSubClones({
   nextSubSnapshot,
   themeAccent,
 }: RenderDeskAgentAndSubClonesParams): void {
-  const spriteNum = spriteMap.get(agent.id) ?? (hashStr(agent.id) % 13) + 1;
   const charContainer = new Container();
   charContainer.position.set(ax, charFeetY);
   charContainer.eventMode = "static";
   charContainer.cursor = "pointer";
   charContainer.on("pointerdown", () => cbRef.current.onSelectAgent(agent));
 
-  const frames: Texture[] = [];
-  for (let frame = 1; frame <= 3; frame++) {
-    const key = `${spriteNum}-D-${frame}`;
-    if (textures[key]) frames.push(textures[key]);
+  // Use programmatic Chao renderer based on sprite_config
+  const spriteConfig = (agent as any).sprite_config as { color?: string; accessory?: string } | null;
+  const chaoColor = spriteConfig?.color ?? "blue";
+  const chaoAccessory = spriteConfig?.accessory ?? "none";
+  const chaoChar = drawChaoCharacter(chaoColor, chaoAccessory, "D", 1, TARGET_CHAR_H);
+  if (isOffline) {
+    chaoChar.alpha = 0.3;
   }
-
-  if (frames.length > 0) {
-    const animSprite = new AnimatedSprite(frames);
-    animSprite.anchor.set(0.5, 1);
-    const scale = TARGET_CHAR_H / animSprite.texture.height;
-    animSprite.scale.set(scale);
-    animSprite.gotoAndStop(0);
-    if (isOffline) {
-      animSprite.alpha = 0.3;
-      animSprite.tint = 0x888899;
-    }
-    charContainer.addChild(animSprite);
-  } else {
-    const fallback = new Text({ text: agent.avatar_emoji || "🤖", style: new TextStyle({ fontSize: 24 }) });
-    fallback.anchor.set(0.5, 1);
-    charContainer.addChild(fallback);
-  }
+  charContainer.addChild(chaoChar);
   // Mood orb floating above Chao's head
   const mood = (agent as any).mood ?? "happy";
   drawMoodOrb(charContainer, 0, -TARGET_CHAR_H + 4, mood);
