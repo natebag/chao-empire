@@ -361,7 +361,7 @@ export function registerAgentCrudRoutes(ctx: RuntimeContext): void {
       const model_config = serializeJsonField(body.model_config);
       const mood = typeof body.mood === "string" ? body.mood.trim() || null : null;
       const energy = typeof body.energy === "number" ? body.energy : null;
-      const xp = typeof body.xp === "number" ? body.xp : null;
+      const stats_xp = typeof body.xp === "number" ? body.xp : (typeof body.stats_xp === "number" ? body.stats_xp : null);
       const level = typeof body.level === "number" ? body.level : null;
       const sprite_config = serializeJsonField(body.sprite_config);
 
@@ -369,7 +369,7 @@ export function registerAgentCrudRoutes(ctx: RuntimeContext): void {
       try {
         if (hasAgentWorkflowPackColumn) {
           db.prepare(
-            `INSERT INTO agents (id, name, name_ko, name_ja, name_zh, department_id, workflow_pack_key, role, cli_provider, avatar_emoji, sprite_number, personality, model_config, mood, energy, xp, level, sprite_config)
+            `INSERT INTO agents (id, name, name_ko, name_ja, name_zh, department_id, workflow_pack_key, role, cli_provider, avatar_emoji, sprite_number, personality, model_config, mood, energy, stats_xp, level, sprite_config)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           ).run(
             id,
@@ -387,13 +387,13 @@ export function registerAgentCrudRoutes(ctx: RuntimeContext): void {
             model_config,
             mood,
             energy,
-            xp,
+            stats_xp,
             level,
             sprite_config,
           );
         } else {
           db.prepare(
-            `INSERT INTO agents (id, name, name_ko, name_ja, name_zh, department_id, role, cli_provider, avatar_emoji, sprite_number, personality, model_config, mood, energy, xp, level, sprite_config)
+            `INSERT INTO agents (id, name, name_ko, name_ja, name_zh, department_id, role, cli_provider, avatar_emoji, sprite_number, personality, model_config, mood, energy, stats_xp, level, sprite_config)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           ).run(
             id,
@@ -410,7 +410,7 @@ export function registerAgentCrudRoutes(ctx: RuntimeContext): void {
             model_config,
             mood,
             energy,
-            xp,
+            stats_xp,
             level,
             sprite_config,
           );
@@ -638,7 +638,7 @@ export function registerAgentCrudRoutes(ctx: RuntimeContext): void {
       "model_config",
       "mood",
       "energy",
-      "xp",
+      "stats_xp",
       "level",
       "sprite_config",
       "status",
