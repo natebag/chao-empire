@@ -13,6 +13,7 @@ import {
 } from "./model";
 import { hashStr } from "./drawing-core";
 import { drawDesk } from "./drawing-furniture-a";
+import { drawMoodOrb, drawLevelBadge } from "./drawing-mood";
 
 interface RenderDeskAgentAndSubClonesParams {
   room: Container;
@@ -84,6 +85,16 @@ export function renderDeskAgentAndSubClones({
     fallback.anchor.set(0.5, 1);
     charContainer.addChild(fallback);
   }
+  // Mood orb floating above Chao's head
+  const mood = (agent as any).mood ?? "happy";
+  drawMoodOrb(charContainer, 0, -TARGET_CHAR_H + 4, mood);
+
+  // Level badge below Chao (only if above level 1)
+  const level = (agent as any).level ?? 1;
+  if (level > 1) {
+    drawLevelBadge(charContainer, 0, 6, level);
+  }
+
   room.addChild(charContainer);
 
   const deskG = drawDesk(room, ax - DESK_W / 2, deskY, isWorking);
