@@ -63,18 +63,39 @@ export function renderDeskAgentAndSubClones({
   charContainer.cursor = "pointer";
   charContainer.on("pointerdown", () => cbRef.current.onSelectAgent(agent));
 
-  // Render Chao from atlas spritesheet (falls back to programmatic if atlas not loaded)
+  // Map Chao color to sprite number (1=normal, 2=hero, 3=angel, 4=dark)
   const spriteConfig = (agent as any).sprite_config as { color?: string; accessory?: string } | null;
   const chaoColor = spriteConfig?.color ?? "blue";
-  const chaoAccessory = spriteConfig?.accessory ?? "none";
-  const atlasTexture = textures["chao-atlas"];
-  const chaoChar = atlasTexture
-    ? drawChaoFromPreloadedAtlas(atlasTexture, chaoColor, chaoAccessory, "D", 0, TARGET_CHAR_H)
-    : drawChaoCharacter(chaoColor, chaoAccessory, "D", 1, TARGET_CHAR_H);
-  if (isOffline) {
-    chaoChar.alpha = 0.3;
+  const CHAO_SPRITE_MAP: Record<string, number> = {
+    blue: 1, green: 1, red: 1, purple: 1, pink: 1,
+    yellow: 2, orange: 2, gold: 2,
+    white: 3,
+    dark: 4,
+  };
+  const spriteNum = CHAO_SPRITE_MAP[chaoColor] ?? 1;
+
+  const frames: Texture[] = [];
+  for (let frame = 1; frame <= 3; frame++) {
+    const key = `${spriteNum}-D-${frame}`;
+    if (textures[key]) frames.push(textures[key]);
   }
-  charContainer.addChild(chaoChar);
+
+  if (frames.length > 0) {
+    const animSprite = new AnimatedSprite(frames);
+    animSprite.anchor.set(0.5, 1);
+    const scale = TARGET_CHAR_H / animSprite.texture.height;
+    animSprite.scale.set(scale);
+    animSprite.gotoAndStop(0);
+    if (isOffline) {
+      animSprite.alpha = 0.3;
+      animSprite.tint = 0x888899;
+    }
+    charContainer.addChild(animSprite);
+  } else {
+    const fallback = new Text({ text: agent.avatar_emoji || "🤖", style: new TextStyle({ fontSize: 24 }) });
+    fallback.anchor.set(0.5, 1);
+    charContainer.addChild(fallback);
+  }
   // Mood orb floating above Chao's head
   const mood = (agent as any).mood ?? "happy";
   drawMoodOrb(charContainer, 0, -TARGET_CHAR_H + 4, mood);

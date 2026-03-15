@@ -153,16 +153,31 @@ export function buildBreakRoom({
     charContainer.cursor = "pointer";
     charContainer.on("pointerdown", () => cbRef.current.onSelectAgent(agent));
 
-    // Render Chao from atlas (falls back to programmatic)
-    const spriteConfig = (agent as any).sprite_config as { color?: string; accessory?: string } | null;
+    // Map Chao color to sprite number
+    const spriteConfig = (agent as any).sprite_config as { color?: string } | null;
     const chaoColor = spriteConfig?.color ?? "blue";
-    const chaoAccessory = spriteConfig?.accessory ?? "none";
-    const dir = (spot.dir === "L" || spot.dir === "R") ? spot.dir as "L" | "R" : "D";
-    const atlasTexture = textures["chao-atlas"];
-    const chaoChar = atlasTexture
-      ? drawChaoFromPreloadedAtlas(atlasTexture, chaoColor, chaoAccessory, dir, 0, TARGET_CHAR_H * 0.85)
-      : drawChaoCharacter(chaoColor, chaoAccessory, dir, 1, TARGET_CHAR_H * 0.85);
-    charContainer.addChild(chaoChar);
+    const CHAO_SPRITE_MAP: Record<string, number> = {
+      blue: 1, green: 1, red: 1, purple: 1, pink: 1,
+      yellow: 2, orange: 2, gold: 2,
+      white: 3, dark: 4,
+    };
+    const spriteNum = CHAO_SPRITE_MAP[chaoColor] ?? 1;
+
+    const dirKey = `${spriteNum}-${spot.dir}-1`;
+    const fallbackKey = `${spriteNum}-D-1`;
+    const texture = textures[dirKey] || textures[fallbackKey];
+
+    if (texture) {
+      const sprite = new Sprite(texture);
+      sprite.anchor.set(0.5, 1);
+      const scale = (TARGET_CHAR_H * 0.85) / sprite.texture.height;
+      sprite.scale.set(scale);
+      charContainer.addChild(sprite);
+    } else {
+      const fallback = new Text({ text: agent.avatar_emoji || "🤖", style: new TextStyle({ fontSize: 20 }) });
+      fallback.anchor.set(0.5, 1);
+      charContainer.addChild(fallback);
+    }
     breakRoom.addChild(charContainer);
 
     breakAnimItemsRef.current.push({
